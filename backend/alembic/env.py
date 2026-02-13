@@ -10,7 +10,12 @@ from app.infrastructure.database.base import Base
 from app.infrastructure.database.models import *  # noqa: F401,F403
 
 config = context.config
-config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)
+
+def _fix_database_url(url: str) -> str:
+    """Convert sslmode to ssl for asyncpg compatibility."""
+    return url.replace("sslmode=", "ssl=").replace("channel_binding=require", "").rstrip("&?")
+
+config.set_main_option("sqlalchemy.url", _fix_database_url(settings.DATABASE_URL))
 
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
