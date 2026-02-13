@@ -49,6 +49,9 @@ python_version = "3.11"
 strict = true
 plugins = ["pydantic.mypy"]
 
+[tool.setuptools.packages.find]
+include = ["app*"]
+
 [build-system]
 requires = ["setuptools>=68.0"]
 build-backend = "setuptools.build_meta"
