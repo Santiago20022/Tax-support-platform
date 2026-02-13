@@ -21,7 +21,13 @@ class RedisCache:
         self._redis: redis.Redis | None = None
 
     async def connect(self) -> None:
-        self._redis = redis.from_url(settings.REDIS_URL, decode_responses=True)
+        if not settings.REDIS_URL:
+            return
+        try:
+            self._redis = redis.from_url(settings.REDIS_URL, decode_responses=True)
+            await self._redis.ping()
+        except Exception:
+            self._redis = None
 
     async def disconnect(self) -> None:
         if self._redis:
