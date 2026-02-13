@@ -26,7 +26,7 @@ export default function DashboardLayout({
   if (!isAuthenticated) return null;
 
   return (
-    <div className="flex h-screen overflow-hidden">
+    <div className="flex h-screen overflow-hidden bg-body">
       <Sidebar />
       <div className="flex flex-1 flex-col overflow-hidden">
         <Header />

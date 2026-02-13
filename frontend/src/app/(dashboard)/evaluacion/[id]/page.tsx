@@ -2,6 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useApiQuery } from "@/lib/hooks";
+import { useT, useLanguage } from "@/lib/language-context";
 import { ROUTES } from "@/lib/constants";
 import { formatDateTime } from "@/lib/format";
 import type { EvaluationResponse } from "@/lib/types";
@@ -15,12 +16,14 @@ import { DisclaimerBanner } from "@/components/evaluation/disclaimer-banner";
 export default function EvaluationDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const t = useT();
+  const { locale } = useLanguage();
   const { data: evaluation, loading, error } = useApiQuery<EvaluationResponse>(
     `/evaluations/${id}`,
   );
 
-  if (loading) return <SectionSpinner text="Cargando resultados..." />;
-  if (error || !evaluation) return <Alert variant="error">{error || "Evaluación no encontrada"}</Alert>;
+  if (loading) return <SectionSpinner text={t.evaluation.loadingResults} />;
+  if (error || !evaluation) return <Alert variant="error">{error || t.evaluation.notFound}</Alert>;
 
   const grouped = evaluation.results.reduce<Record<string, typeof evaluation.results>>(
     (acc, r) => {
@@ -36,20 +39,20 @@ export default function EvaluationDetailPage() {
     <div className="mx-auto max-w-4xl animate-fade-in">
       <div className="mb-6 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-            Resultados
+          <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+            {t.evaluation.results}
           </h1>
-          <p className="mt-1 text-sm text-gray-500">
-            {formatDateTime(evaluation.evaluated_at)}
+          <p className="mt-1 text-sm text-text-secondary">
+            {formatDateTime(evaluation.evaluated_at, locale)}
             {evaluation.fiscal_year && (
-              <span className="ml-2 inline-flex items-center rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
-                Año {evaluation.fiscal_year}
+              <span className="ml-2 inline-flex items-center rounded-md bg-surface-secondary px-2 py-0.5 text-xs font-medium text-text-muted">
+                {t.evaluation.yearLabel} {evaluation.fiscal_year}
               </span>
             )}
           </p>
         </div>
         <Button variant="secondary" size="sm" onClick={() => router.push(ROUTES.EVALUATIONS)}>
-          Volver
+          {t.common.back}
         </Button>
       </div>
 
@@ -60,10 +63,10 @@ export default function EvaluationDetailPage() {
 
         {Object.entries(grouped).map(([category, results]) => (
           <div key={category}>
-            <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-gray-400">
-              <span className="h-px flex-1 bg-gray-200" />
+            <h2 className="mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wider text-text-tertiary">
+              <span className="h-px flex-1 bg-border-strong" />
               {category}
-              <span className="h-px flex-1 bg-gray-200" />
+              <span className="h-px flex-1 bg-border-strong" />
             </h2>
             <div className="stagger space-y-3">
               {results.map((r, i) => (

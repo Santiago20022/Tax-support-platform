@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { NAV_ITEMS } from "@/lib/constants";
+import { useT } from "@/lib/language-context";
 
 const icons: Record<string, (active: boolean) => React.ReactNode> = {
   home: (active) => (
@@ -29,9 +30,9 @@ const icons: Record<string, (active: boolean) => React.ReactNode> = {
   clipboard: (active) => (
     <svg className="h-5 w-5" fill={active ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={active ? 0 : 1.5}>
       {active ? (
-        <path fillRule="evenodd" d="M10.5 3A1.501 1.501 0 009 4.5h6A1.5 1.5 0 0013.5 3h-3zm-2.693.178A3 3 0 0110.5 1.5h3a3 3 0 012.694 1.678c.497.042.992.092 1.486.15C18.89 3.472 19.5 4.478 19.5 5.59v14.66a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 20.25V5.59c0-1.113.61-2.118 1.82-2.262a41.44 41.44 0 011.487-.15zM15.53 11.03a.75.75 0 00-1.06-1.06L10 14.44l-1.72-1.72a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.06 0l5-5z" clipRule="evenodd" />
+        <path fillRule="evenodd" d="M12 2.25a.75.75 0 01.75.75v.756a49.106 49.106 0 019.152 1 .75.75 0 01-.152 1.485h-1.918l2.474 10.124a.75.75 0 01-.375.84A6.723 6.723 0 0118.75 18a6.723 6.723 0 01-3.181-.795.75.75 0 01-.375-.84l2.474-10.124H12.75v13.259a.75.75 0 01-1.5 0V6.241H6.332l2.474 10.124a.75.75 0 01-.375.84A6.723 6.723 0 015.25 18a6.723 6.723 0 01-3.181-.795.75.75 0 01-.375-.84L4.168 6.241H2.25a.75.75 0 01-.152-1.485 49.105 49.105 0 019.152-1V3a.75.75 0 01.75-.75zm4.878 13.543l1.872-7.662 1.872 7.662h-3.744zm-9.756 0L5.25 8.131l-1.872 7.662h3.744z" clipRule="evenodd" />
       ) : (
-        <path strokeLinecap="round" strokeLinejoin="round" d="M11.35 3.836c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15c1.012 0 1.867.668 2.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V19.5a2.625 2.625 0 002.625 2.625h6.75a2.625 2.625 0 002.625-2.625V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664M9.75 12l2.25 2.25L15.75 10.5" />
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v17.25m0 0c-1.472 0-2.882.265-4.185.75M12 20.25c1.472 0 2.882.265 4.185.75M18.75 4.97A48.416 48.416 0 0012 4.5c-2.291 0-4.545.16-6.75.47m13.5 0c1.01.143 2.01.317 3 .52m-3-.52l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.988 5.988 0 01-2.031.352 5.988 5.988 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L18.75 4.971zm-16.5.52c.99-.203 1.99-.377 3-.52m0 0l2.62 10.726c.122.499-.106 1.028-.589 1.202a5.989 5.989 0 01-2.031.352 5.989 5.989 0 01-2.031-.352c-.483-.174-.711-.703-.59-1.202L5.25 4.971z" />
       )}
     </svg>
   ),
@@ -58,9 +59,10 @@ const icons: Record<string, (active: boolean) => React.ReactNode> = {
 
 export function Sidebar() {
   const pathname = usePathname();
+  const t = useT();
 
   return (
-    <aside className="hidden w-64 shrink-0 border-r border-gray-100 bg-white lg:flex lg:flex-col">
+    <aside className="hidden w-64 shrink-0 border-r border-border bg-surface lg:flex lg:flex-col">
       {/* Logo */}
       <div className="flex h-16 items-center gap-3 px-6">
         <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 shadow-sm shadow-primary-500/25">
@@ -69,42 +71,42 @@ export function Sidebar() {
           </svg>
         </div>
         <div>
-          <span className="text-base font-bold tracking-tight text-gray-900">Tributario</span>
-          <span className="block text-[10px] font-medium uppercase tracking-wider text-gray-400">Plataforma</span>
+          <span className="text-base font-bold tracking-tight text-text-primary">{t.common.appName}</span>
+          <span className="block text-[10px] font-medium uppercase tracking-wider text-text-tertiary">{t.common.platform}</span>
         </div>
       </div>
 
       {/* Nav */}
-      <nav className="mt-2 flex-1 space-y-0.5 px-3">
+      <nav className="mt-4 flex-1 space-y-1 px-3">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname.startsWith(item.href);
           return (
             <Link
               key={item.href}
               href={item.href}
-              className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+              className={`group flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-all duration-200 ${
                 isActive
                   ? "bg-primary-50 text-primary-700 shadow-sm"
-                  : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"
+                  : "text-text-secondary hover:bg-surface-hover hover:text-text-primary"
               }`}
             >
               <span className={`transition-colors duration-200 ${
-                isActive ? "text-primary-600" : "text-gray-400 group-hover:text-gray-600"
+                isActive ? "text-primary-600" : "text-text-tertiary group-hover:text-text-muted"
               }`}>
                 {icons[item.icon](isActive)}
               </span>
-              {item.label}
+              {t.nav[item.key]}
             </Link>
           );
         })}
       </nav>
 
       {/* Footer */}
-      <div className="border-t border-gray-100 p-4">
+      <div className="border-t border-border p-4 mt-6">
         <div className="rounded-xl bg-gradient-to-br from-primary-50 to-primary-100/50 p-3">
-          <p className="text-xs font-semibold text-primary-700">Herramienta informativa</p>
+          <p className="text-xs font-semibold text-primary-700">{t.sidebar.informational}</p>
           <p className="mt-0.5 text-[11px] leading-relaxed text-primary-600/70">
-            No reemplaza asesoría tributaria profesional.
+            {t.sidebar.disclaimer}
           </p>
         </div>
       </div>
@@ -114,9 +116,10 @@ export function Sidebar() {
 
 export function MobileNav() {
   const pathname = usePathname();
+  const t = useT();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-gray-100 bg-white/95 backdrop-blur-lg lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-border bg-surface/95 backdrop-blur-lg lg:hidden">
       <div className="flex">
         {NAV_ITEMS.map((item) => {
           const isActive = pathname.startsWith(item.href);
@@ -125,11 +128,11 @@ export function MobileNav() {
               key={item.href}
               href={item.href}
               className={`flex flex-1 flex-col items-center gap-0.5 pb-[env(safe-area-inset-bottom)] pt-2 pb-2 transition-colors ${
-                isActive ? "text-primary-600" : "text-gray-400"
+                isActive ? "text-primary-600" : "text-text-tertiary"
               }`}
             >
               {icons[item.icon](isActive)}
-              <span className="text-[10px] font-semibold">{item.label.split(" ")[0]}</span>
+              <span className="text-[10px] font-semibold">{t.nav[item.key].split(" ")[0]}</span>
             </Link>
           );
         })}

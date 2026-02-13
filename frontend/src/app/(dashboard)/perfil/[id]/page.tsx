@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { apiClient, ApiError } from "@/lib/api-client";
 import { useApiQuery } from "@/lib/hooks";
-import { ROUTES, PERSONA_TYPES, REGIMES } from "@/lib/constants";
+import { useT, useLanguage } from "@/lib/language-context";
+import { ROUTES } from "@/lib/constants";
 import { formatCOP } from "@/lib/format";
 import type { ProfileResponse, EvaluationResponse } from "@/lib/types";
 import { Card } from "@/components/ui/card";
@@ -16,6 +17,8 @@ import { Alert } from "@/components/ui/alert";
 export default function ProfileDetailPage() {
   const { id } = useParams<{ id: string }>();
   const router = useRouter();
+  const t = useT();
+  const { locale } = useLanguage();
   const { data: profile, loading, error: loadError } = useApiQuery<ProfileResponse>(`/profiles/${id}`);
   const [evaluating, setEvaluating] = useState(false);
   const [error, setError] = useState("");
@@ -30,56 +33,56 @@ export default function ProfileDetailPage() {
       });
       router.push(ROUTES.EVALUATION_DETAIL(evaluation.id));
     } catch (err) {
-      setError(err instanceof ApiError ? err.detail : "Error al evaluar");
+      setError(err instanceof ApiError ? err.detail : t.profile.evaluateError);
       setEvaluating(false);
     }
   }
 
   async function handleDelete() {
-    if (!confirm("¿Estás seguro de eliminar este perfil?")) return;
+    if (!confirm(t.profile.deleteConfirm)) return;
     try {
       await apiClient(`/profiles/${id}`, { method: "DELETE" });
       router.push(ROUTES.PROFILES);
     } catch {
-      setError("Error al eliminar el perfil");
+      setError(t.profile.deleteError);
     }
   }
 
-  if (loading) return <SectionSpinner text="Cargando perfil..." />;
-  if (loadError || !profile) return <Alert variant="error">{loadError || "Perfil no encontrado"}</Alert>;
+  if (loading) return <SectionSpinner text={t.profile.loadingProfile} />;
+  if (loadError || !profile) return <Alert variant="error">{loadError || t.profile.notFound}</Alert>;
 
   const fields = [
-    { label: "Tipo de persona", value: PERSONA_TYPES[profile.persona_type] || profile.persona_type },
-    { label: "Régimen", value: REGIMES[profile.regime] || profile.regime },
-    { label: "Responsable IVA", value: profile.is_iva_responsable ? "Sí" : "No" },
-    { label: "Ingresos brutos", value: formatCOP(profile.ingresos_brutos_cop) },
-    { label: "Patrimonio bruto", value: formatCOP(profile.patrimonio_bruto_cop) },
-    { label: "Consignaciones", value: formatCOP(profile.consignaciones_cop) },
-    { label: "Compras y consumos", value: formatCOP(profile.compras_consumos_cop) },
-    { label: "CIIU", value: profile.economic_activity_ciiu || "—" },
-    { label: "Ciudad", value: profile.city || "—" },
-    { label: "Departamento", value: profile.department || "—" },
-    { label: "Empleados", value: profile.has_employees ? `${profile.employee_count}` : "No" },
-    { label: "RUT", value: profile.has_rut ? "Sí" : "No" },
-    { label: "Registro mercantil", value: profile.has_comercio_registration ? "Sí" : "No" },
-    { label: "Último dígito NIT", value: profile.nit_last_digit?.toString() ?? "—" },
+    { label: t.profileFields.personaType, value: t.labels.personaTypes[profile.persona_type] || profile.persona_type },
+    { label: t.profileFields.regime, value: t.labels.regimes[profile.regime] || profile.regime },
+    { label: t.profileFields.ivaResponsable, value: profile.is_iva_responsable ? t.common.yes : t.common.no },
+    { label: t.profileFields.grossIncome, value: formatCOP(profile.ingresos_brutos_cop, locale) },
+    { label: t.profileFields.grossWealth, value: formatCOP(profile.patrimonio_bruto_cop, locale) },
+    { label: t.profileFields.deposits, value: formatCOP(profile.consignaciones_cop, locale) },
+    { label: t.profileFields.purchases, value: formatCOP(profile.compras_consumos_cop, locale) },
+    { label: t.profileFields.ciiu, value: profile.economic_activity_ciiu || "—" },
+    { label: t.profileFields.city, value: profile.city || "—" },
+    { label: t.profileFields.department, value: profile.department || "—" },
+    { label: t.profileFields.employees, value: profile.has_employees ? `${profile.employee_count}` : t.common.no },
+    { label: t.profileFields.rut, value: profile.has_rut ? t.common.yes : t.common.no },
+    { label: t.profileFields.commerceReg, value: profile.has_comercio_registration ? t.common.yes : t.common.no },
+    { label: t.profileFields.nitLastDigit, value: profile.nit_last_digit?.toString() ?? "—" },
   ];
 
   return (
     <div className="mx-auto max-w-2xl animate-fade-in space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-gray-900">Detalle del Perfil</h1>
-          <p className="mt-1 text-sm text-gray-500">
-            {PERSONA_TYPES[profile.persona_type]} — {REGIMES[profile.regime]}
+          <h1 className="text-2xl font-bold tracking-tight text-text-primary">{t.profile.detail}</h1>
+          <p className="mt-1 text-sm text-text-secondary">
+            {t.labels.personaTypes[profile.persona_type]} — {t.labels.regimes[profile.regime]}
           </p>
         </div>
         <div className="flex gap-2">
           <Button variant="ghost" size="sm" onClick={() => router.push(ROUTES.PROFILES)}>
-            Volver
+            {t.common.back}
           </Button>
           <Button variant="danger" size="sm" onClick={handleDelete}>
-            Eliminar
+            {t.common.delete}
           </Button>
         </div>
       </div>
@@ -94,19 +97,19 @@ export default function ProfileDetailPage() {
             </svg>
           </div>
           <div>
-            <h2 className="text-lg font-semibold text-gray-900">
-              {PERSONA_TYPES[profile.persona_type]}
+            <h2 className="text-lg font-semibold text-text-primary">
+              {t.labels.personaTypes[profile.persona_type]}
             </h2>
             <Badge variant={profile.is_iva_responsable ? "info" : "gray"} dot>
-              {profile.is_iva_responsable ? "IVA Responsable" : "No responsable de IVA"}
+              {profile.is_iva_responsable ? t.profile.ivaResp : t.profile.ivaNotResp}
             </Badge>
           </div>
         </div>
-        <dl className="grid grid-cols-2 gap-x-6 gap-y-4 border-t border-gray-100 pt-5">
+        <dl className="grid grid-cols-2 gap-x-6 gap-y-4 border-t border-border pt-5">
           {fields.map((f) => (
             <div key={f.label}>
-              <dt className="text-xs font-medium text-gray-400">{f.label}</dt>
-              <dd className="mt-0.5 text-sm font-semibold text-gray-900">{f.value}</dd>
+              <dt className="text-xs font-medium text-text-tertiary">{f.label}</dt>
+              <dd className="mt-0.5 text-sm font-semibold text-text-primary">{f.value}</dd>
             </div>
           ))}
         </dl>
@@ -116,7 +119,7 @@ export default function ProfileDetailPage() {
         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
           <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        Evaluar Obligaciones Tributarias
+        {t.profile.evaluateBtn}
       </Button>
     </div>
   );

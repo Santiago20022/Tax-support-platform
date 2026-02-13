@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { EvaluationResult } from "@/lib/types";
-import { RESULT_LABELS, PERIODICITY_LABELS } from "@/lib/constants";
+import { useT } from "@/lib/language-context";
 import { Badge } from "@/components/ui/badge";
 
 interface ResultCardProps {
@@ -23,7 +23,7 @@ const resultIcons: Record<string, React.ReactNode> = {
     </svg>
   ),
   does_not_apply: (
-    <svg className="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+    <svg className="h-5 w-5 text-text-tertiary" viewBox="0 0 20 20" fill="currentColor">
       <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clipRule="evenodd" />
     </svg>
   ),
@@ -41,10 +41,11 @@ const resultIcons: Record<string, React.ReactNode> = {
 
 export function ResultCard({ result }: ResultCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const t = useT();
   const hasDetails = result.legal_references.length > 0 || result.conditions_evaluated.length > 0;
 
   return (
-    <div className="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all duration-200 hover:shadow-md">
+    <div className="rounded-2xl border border-border bg-surface p-5 shadow-sm transition-all duration-200 hover:shadow-md">
       <div className="flex items-start gap-3">
         <div className="mt-0.5 shrink-0">
           {resultIcons[result.result] || resultIcons.does_not_apply}
@@ -52,26 +53,26 @@ export function ResultCard({ result }: ResultCardProps) {
         <div className="flex-1 min-w-0">
           <div className="flex flex-wrap items-start justify-between gap-2">
             <div>
-              <h3 className="font-semibold text-gray-900 leading-snug">
+              <h3 className="font-semibold text-text-primary leading-snug">
                 {result.obligation.name}
               </h3>
               {result.obligation.category && (
-                <p className="mt-0.5 text-xs text-gray-400">{result.obligation.category}</p>
+                <p className="mt-0.5 text-xs text-text-tertiary">{result.obligation.category}</p>
               )}
             </div>
             <div className="flex shrink-0 items-center gap-2">
               {result.periodicity && (
                 <Badge variant="gray" size="sm">
-                  {PERIODICITY_LABELS[result.periodicity] || result.periodicity}
+                  {t.labels.periodicities[result.periodicity] || result.periodicity}
                 </Badge>
               )}
               <Badge variant={resultBadgeVariant[result.result] || "gray"}>
-                {RESULT_LABELS[result.result] || result.result}
+                {t.labels.results[result.result] || result.result}
               </Badge>
             </div>
           </div>
 
-          <p className="mt-2.5 text-sm leading-relaxed text-gray-600">{result.explanation}</p>
+          <p className="mt-2.5 text-sm leading-relaxed text-text-muted">{result.explanation}</p>
 
           {hasDetails && (
             <button
@@ -79,7 +80,7 @@ export function ResultCard({ result }: ResultCardProps) {
               onClick={() => setExpanded(!expanded)}
               className="mt-3 inline-flex items-center gap-1 text-xs font-semibold text-primary-600 transition-colors hover:text-primary-500"
             >
-              {expanded ? "Ocultar detalles" : "Ver detalles"}
+              {expanded ? t.common.hideDetails : t.common.viewDetails}
               <svg
                 className={`h-3.5 w-3.5 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
                 fill="none"
@@ -95,25 +96,25 @@ export function ResultCard({ result }: ResultCardProps) {
           {expanded && (
             <div className="mt-4 space-y-4 animate-fade-in">
               {result.legal_references.length > 0 && (
-                <div className="rounded-xl bg-gray-50 p-3">
-                  <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
-                    Referencias legales
+                <div className="rounded-xl bg-surface-inset p-3">
+                  <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">
+                    {t.evaluation.legalReferences}
                   </h4>
                   <ul className="space-y-1">
                     {result.legal_references.map((ref, i) => (
-                      <li key={i} className="text-xs text-gray-600 leading-relaxed">{ref}</li>
+                      <li key={i} className="text-xs text-text-muted leading-relaxed">{ref}</li>
                     ))}
                   </ul>
                 </div>
               )}
               {result.conditions_evaluated.length > 0 && (
-                <div className="rounded-xl bg-gray-50 p-3">
-                  <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-gray-400">
-                    Condiciones evaluadas
+                <div className="rounded-xl bg-surface-inset p-3">
+                  <h4 className="mb-2 text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">
+                    {t.evaluation.conditionsEvaluated}
                   </h4>
                   <ul className="space-y-1.5">
                     {result.conditions_evaluated.map((cond, i) => (
-                      <li key={i} className="flex items-center gap-2 text-xs text-gray-600">
+                      <li key={i} className="flex items-center gap-2 text-xs text-text-muted">
                         <span
                           className={`inline-block h-2 w-2 shrink-0 rounded-full ${
                             (cond as Record<string, unknown>).met ? "bg-success-500" : "bg-danger-500"

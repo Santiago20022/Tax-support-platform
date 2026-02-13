@@ -16,7 +16,7 @@ export function Spinner({ size = "md", className = "" }: SpinnerProps) {
         <circle className="opacity-20" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
         <path className="opacity-80" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
       </svg>
-      <span className="sr-only">Cargando...</span>
+      <span className="sr-only">Loading...</span>
     </div>
   );
 }
@@ -25,7 +25,7 @@ export function FullPageSpinner({ text }: { text?: string }) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4">
       <Spinner size="lg" />
-      {text && <p className="text-sm font-medium text-gray-400">{text}</p>}
+      {text && <p className="text-sm font-medium text-text-tertiary">{text}</p>}
     </div>
   );
 }
@@ -34,7 +34,7 @@ export function SectionSpinner({ text }: { text?: string }) {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-16">
       <Spinner size="md" />
-      {text && <p className="text-sm text-gray-400">{text}</p>}
+      {text && <p className="text-sm text-text-tertiary">{text}</p>}
     </div>
   );
 }

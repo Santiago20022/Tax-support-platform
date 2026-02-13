@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useApiQuery } from "@/lib/hooks";
+import { useT, useLanguage } from "@/lib/language-context";
 import { ROUTES } from "@/lib/constants";
 import { formatDateTime } from "@/lib/format";
 import type { EvaluationListItem } from "@/lib/types";
@@ -12,8 +13,10 @@ import { EmptyState } from "@/components/ui/empty-state";
 
 export default function EvaluationsPage() {
   const { data: evaluations, loading } = useApiQuery<EvaluationListItem[]>("/evaluations");
+  const t = useT();
+  const { locale } = useLanguage();
 
-  if (loading) return <SectionSpinner text="Cargando evaluaciones..." />;
+  if (loading) return <SectionSpinner text={t.evaluation.loadingEvaluations} />;
 
   if (!evaluations || evaluations.length === 0) {
     return (
@@ -23,9 +26,9 @@ export default function EvaluationsPage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
         }
-        title="Sin evaluaciones"
-        description="Crea un perfil tributario para evaluar qué obligaciones te aplican."
-        action={{ label: "Crear Perfil", href: ROUTES.PROFILES }}
+        title={t.evaluation.noEvaluations}
+        description={t.evaluation.noEvaluationsDesc}
+        action={{ label: t.evaluation.createProfile, href: ROUTES.PROFILES }}
       />
     );
   }
@@ -33,9 +36,9 @@ export default function EvaluationsPage() {
   return (
     <div className="mx-auto max-w-4xl animate-fade-in">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold tracking-tight text-gray-900">Evaluaciones</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Historial de evaluaciones de tus perfiles tributarios
+        <h1 className="text-2xl font-bold tracking-tight text-text-primary">{t.evaluation.title}</h1>
+        <p className="mt-1 text-sm text-text-secondary">
+          {t.evaluation.historyDesc}
         </p>
       </div>
 
@@ -59,8 +62,8 @@ export default function EvaluationsPage() {
                     )}
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-gray-900">
-                      {formatDateTime(ev.evaluated_at)}
+                    <p className="text-sm font-semibold text-text-primary">
+                      {formatDateTime(ev.evaluated_at, locale)}
                     </p>
                     <Badge
                       variant={ev.status === "completed" ? "success" : "warning"}
@@ -68,14 +71,14 @@ export default function EvaluationsPage() {
                       dot
                       className="mt-1"
                     >
-                      {ev.status === "completed" ? "Completada" : "Pendiente"}
+                      {ev.status === "completed" ? t.evaluation.completed : t.evaluation.pendingStatus}
                     </Badge>
                   </div>
                 </div>
                 {ev.summary && (
                   <div className="flex gap-2">
-                    <Badge variant="success">{ev.summary.applies} aplican</Badge>
-                    <Badge variant="gray">{ev.summary.does_not_apply} no aplican</Badge>
+                    <Badge variant="success">{ev.summary.applies} {t.dashboard.nApply}</Badge>
+                    <Badge variant="gray">{ev.summary.does_not_apply} {t.dashboard.nDontApply}</Badge>
                     {ev.summary.conditional > 0 && (
                       <Badge variant="warning">{ev.summary.conditional} cond.</Badge>
                     )}

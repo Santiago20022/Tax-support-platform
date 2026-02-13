@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { apiClient } from "@/lib/api-client";
 import { formatDate } from "@/lib/format";
-import { PERIODICITY_LABELS } from "@/lib/constants";
+import { useT, useLanguage } from "@/lib/language-context";
 import type { CalendarEntry } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 
@@ -14,10 +14,12 @@ interface CalendarListProps {
 
 export function CalendarList({ entries, onUpdate }: CalendarListProps) {
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const t = useT();
+  const { locale } = useLanguage();
 
   const grouped = entries.reduce<Record<string, CalendarEntry[]>>((acc, e) => {
     const date = new Date(e.due_date);
-    const key = date.toLocaleDateString("es-CO", { year: "numeric", month: "long" });
+    const key = date.toLocaleDateString(locale, { year: "numeric", month: "long" });
     if (!acc[key]) acc[key] = [];
     acc[key].push(e);
     return acc;
@@ -42,7 +44,7 @@ export function CalendarList({ entries, onUpdate }: CalendarListProps) {
     <div className="space-y-8">
       {Object.entries(grouped).map(([month, monthEntries]) => (
         <div key={month}>
-          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+          <h3 className="mb-3 text-xs font-semibold uppercase tracking-wider text-text-tertiary">
             {month}
           </h3>
           <div className="stagger space-y-2">
@@ -53,10 +55,10 @@ export function CalendarList({ entries, onUpdate }: CalendarListProps) {
                   key={entry.id}
                   className={`group flex items-start gap-4 rounded-2xl border p-4 transition-all duration-200 ${
                     entry.is_completed
-                      ? "border-gray-100 bg-gray-50/50"
+                      ? "border-border bg-surface-inset/50"
                       : isPast
                         ? "border-danger-200 bg-danger-50/50"
-                        : "border-gray-100 bg-white hover:border-gray-200 hover:shadow-sm"
+                        : "border-border bg-surface hover:border-border-strong hover:shadow-sm"
                   }`}
                 >
                   <button
@@ -65,7 +67,7 @@ export function CalendarList({ entries, onUpdate }: CalendarListProps) {
                     className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 transition-all duration-200 ${
                       entry.is_completed
                         ? "border-success-500 bg-success-500 text-white"
-                        : "border-gray-300 hover:border-primary-400"
+                        : "border-text-tertiary hover:border-primary-400"
                     } ${loadingId === entry.id ? "animate-pulse" : ""}`}
                   >
                     {entry.is_completed && (
@@ -76,19 +78,19 @@ export function CalendarList({ entries, onUpdate }: CalendarListProps) {
                   </button>
                   <div className="flex-1 min-w-0">
                     <p className={`text-sm font-medium leading-snug ${
-                      entry.is_completed ? "text-gray-400 line-through" : "text-gray-900"
+                      entry.is_completed ? "text-text-tertiary line-through" : "text-text-primary"
                     }`}>
                       {entry.title}
                     </p>
                     <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <span className={`text-xs ${isPast && !entry.is_completed ? "font-semibold text-danger-600" : "text-gray-500"}`}>
-                        {formatDate(entry.due_date)}
+                      <span className={`text-xs ${isPast && !entry.is_completed ? "font-semibold text-danger-600" : "text-text-secondary"}`}>
+                        {formatDate(entry.due_date, locale)}
                       </span>
                       <Badge variant="gray" size="sm">
-                        {PERIODICITY_LABELS[entry.periodicity] || entry.periodicity}
+                        {t.labels.periodicities[entry.periodicity] || entry.periodicity}
                       </Badge>
                       {isPast && !entry.is_completed && (
-                        <Badge variant="danger" size="sm" dot>Vencida</Badge>
+                        <Badge variant="danger" size="sm" dot>{t.calendarPage.overdueLabel}</Badge>
                       )}
                     </div>
                   </div>

@@ -27,9 +27,9 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
         className="fixed inset-0 bg-black/50 transition-opacity"
         onClick={onClose}
       />
-      <div className="relative z-10 mx-4 w-full max-w-lg rounded-xl bg-white p-6 shadow-xl">
+      <div className="relative z-10 mx-4 w-full max-w-lg rounded-xl bg-surface p-6 shadow-xl border border-border">
         {title && (
-          <h2 className="mb-4 text-lg font-semibold text-gray-900">{title}</h2>
+          <h2 className="mb-4 text-lg font-semibold text-text-primary">{title}</h2>
         )}
         {children}
       </div>

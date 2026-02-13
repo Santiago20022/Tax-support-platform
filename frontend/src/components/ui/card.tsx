@@ -14,8 +14,8 @@ export function Card({
 }: CardProps) {
   return (
     <div
-      className={`rounded-2xl border border-gray-100 bg-white shadow-sm ${
-        hover ? "transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-gray-200" : ""
+      className={`rounded-2xl border border-border bg-surface shadow-sm ${
+        hover ? "transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md hover:border-border-strong" : ""
       } ${padding ? "p-6" : ""} ${className}`}
       {...props}
     >
@@ -42,7 +42,7 @@ export function CardTitle({
   children: React.ReactNode;
 }) {
   return (
-    <h3 className={`text-lg font-semibold tracking-tight text-gray-900 ${className}`}>
+    <h3 className={`text-lg font-semibold tracking-tight text-text-primary ${className}`}>
       {children}
     </h3>
   );

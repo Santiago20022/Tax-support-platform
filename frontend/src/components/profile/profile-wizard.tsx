@@ -3,7 +3,8 @@
 import { useState, useEffect, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { apiClient, ApiError } from "@/lib/api-client";
-import { ROUTES, PERSONA_TYPES, REGIMES } from "@/lib/constants";
+import { useT, useLanguage } from "@/lib/language-context";
+import { ROUTES } from "@/lib/constants";
 import { formatCOP } from "@/lib/format";
 import type {
   ProfileCreateRequest,
@@ -15,14 +16,6 @@ import { Input } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { Card } from "@/components/ui/card";
 import { Alert } from "@/components/ui/alert";
-
-const STEPS = [
-  { title: "Contribuyente", description: "Tipo y régimen" },
-  { title: "Finanzas", description: "Datos financieros" },
-  { title: "Actividad", description: "Económica y registros" },
-  { title: "Ubicación", description: "Ciudad y empleados" },
-  { title: "Revisión", description: "NIT y resumen final" },
-];
 
 const defaultProfile: ProfileCreateRequest = {
   fiscal_year_id: "",
@@ -61,7 +54,7 @@ function Checkbox({
       className={`flex cursor-pointer items-center gap-3 rounded-xl border p-3.5 transition-all duration-200 ${
         checked
           ? "border-primary-300 bg-primary-50 ring-1 ring-primary-200"
-          : "border-gray-200 hover:border-gray-300 hover:bg-gray-50"
+          : "border-border-strong hover:border-text-tertiary hover:bg-surface-hover"
       }`}
     >
       <input
@@ -71,18 +64,22 @@ function Checkbox({
         onChange={(e) => onChange(e.target.checked)}
         className="h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500"
       />
-      <span className="text-sm font-medium text-gray-700">{label}</span>
+      <span className="text-sm font-medium text-text-label">{label}</span>
     </label>
   );
 }
 
 export function ProfileWizard() {
   const router = useRouter();
+  const t = useT();
+  const { locale } = useLanguage();
   const [step, setStep] = useState(0);
   const [form, setForm] = useState<ProfileCreateRequest>(defaultProfile);
   const [fiscalYears, setFiscalYears] = useState<FiscalYear[]>([]);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const STEPS = t.wizard.steps;
 
   useEffect(() => {
     apiClient<FiscalYear[]>("/fiscal-years", { auth: false })
@@ -105,11 +102,11 @@ export function ProfileWizard() {
   function next() {
     setError("");
     if (step === 0 && !form.fiscal_year_id) {
-      setError("Selecciona un año fiscal");
+      setError(t.wizard.fiscalYearRequired);
       return;
     }
     if (step === 1 && form.ingresos_brutos_cop <= 0) {
-      setError("Los ingresos brutos son requeridos");
+      setError(t.wizard.grossIncomeRequired);
       return;
     }
     setStep((s) => Math.min(s + 1, STEPS.length - 1));
@@ -131,7 +128,7 @@ export function ProfileWizard() {
       });
       router.push(ROUTES.EVALUATION_DETAIL(evaluation.id));
     } catch (err) {
-      setError(err instanceof ApiError ? err.detail : "Error al crear el perfil");
+      setError(err instanceof ApiError ? err.detail : t.wizard.createError);
     } finally {
       setLoading(false);
     }
@@ -150,7 +147,7 @@ export function ProfileWizard() {
                     ? "bg-primary-600 text-white shadow-sm shadow-primary-600/25"
                     : i === step
                       ? "bg-primary-600 text-white shadow-sm shadow-primary-600/25 ring-4 ring-primary-100"
-                      : "bg-gray-100 text-gray-400"
+                      : "bg-surface-secondary text-text-tertiary"
                 }`}
               >
                 {i < step ? (
@@ -163,7 +160,7 @@ export function ProfileWizard() {
               </div>
             </div>
             <span className={`text-[11px] font-medium hidden sm:block ${
-              i <= step ? "text-primary-600" : "text-gray-400"
+              i <= step ? "text-primary-600" : "text-text-tertiary"
             }`}>
               {s.title}
             </span>
@@ -180,37 +177,37 @@ export function ProfileWizard() {
             {step === 0 && (
               <div className="space-y-5">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Tipo de Contribuyente</h2>
-                  <p className="mt-1 text-sm text-gray-500">Selecciona tu tipo de persona y régimen tributario</p>
+                  <h2 className="text-lg font-semibold text-text-primary">{t.wizard.taxpayerType}</h2>
+                  <p className="mt-1 text-sm text-text-secondary">{t.wizard.selectTaxpayerDesc}</p>
                 </div>
                 <Select
                   id="fiscal_year_id"
-                  label="Año Fiscal"
+                  label={t.wizard.fiscalYear}
                   value={form.fiscal_year_id}
                   onChange={(e) => update({ fiscal_year_id: e.target.value })}
                   options={fiscalYears.map((fy) => ({
                     value: fy.id,
-                    label: `${fy.year} (UVT: ${formatCOP(fy.uvt_value)})`,
+                    label: `${fy.year} (UVT: ${formatCOP(fy.uvt_value, locale)})`,
                   }))}
-                  placeholder="Selecciona el año fiscal"
+                  placeholder={t.wizard.selectFiscalYear}
                 />
                 <Select
                   id="persona_type"
-                  label="Tipo de Persona"
+                  label={t.wizard.personaType}
                   value={form.persona_type}
                   onChange={(e) => update({ persona_type: e.target.value })}
-                  options={Object.entries(PERSONA_TYPES).map(([value, label]) => ({ value, label }))}
+                  options={Object.entries(t.labels.personaTypes).map(([value, label]) => ({ value, label }))}
                 />
                 <Select
                   id="regime"
-                  label="Régimen Tributario"
+                  label={t.wizard.regime}
                   value={form.regime}
                   onChange={(e) => update({ regime: e.target.value })}
-                  options={Object.entries(REGIMES).map(([value, label]) => ({ value, label }))}
+                  options={Object.entries(t.labels.regimes).map(([value, label]) => ({ value, label }))}
                 />
                 <Checkbox
                   id="is_iva_responsable"
-                  label="Soy responsable de IVA"
+                  label={t.wizard.ivaCheckbox}
                   checked={form.is_iva_responsable}
                   onChange={(v) => update({ is_iva_responsable: v })}
                 />
@@ -221,31 +218,31 @@ export function ProfileWizard() {
             {step === 1 && (
               <div className="space-y-5">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Datos Financieros</h2>
-                  <p className="mt-1 text-sm text-gray-500">Información de ingresos y patrimonio del año gravable</p>
+                  <h2 className="text-lg font-semibold text-text-primary">{t.wizard.financialTitle}</h2>
+                  <p className="mt-1 text-sm text-text-secondary">{t.wizard.financialDesc}</p>
                 </div>
                 <Input
                   id="ingresos_brutos_cop"
-                  label="Ingresos Brutos (COP)"
+                  label={t.wizard.grossIncome}
                   type="number"
                   value={form.ingresos_brutos_cop || ""}
                   onChange={(e) => update({ ingresos_brutos_cop: numVal(e.target.value) })}
                   placeholder="0"
                   required
-                  hint="Total de ingresos en el año gravable"
+                  hint={t.wizard.grossIncomeHint}
                 />
                 <Input
                   id="patrimonio_bruto_cop"
-                  label="Patrimonio Bruto (COP)"
+                  label={t.wizard.grossWealth}
                   type="number"
                   value={form.patrimonio_bruto_cop || ""}
                   onChange={(e) => update({ patrimonio_bruto_cop: numVal(e.target.value) })}
                   placeholder="0"
-                  hint="Valor total de bienes y derechos"
+                  hint={t.wizard.grossWealthHint}
                 />
                 <Input
                   id="consignaciones_cop"
-                  label="Consignaciones Bancarias (COP)"
+                  label={t.wizard.deposits}
                   type="number"
                   value={form.consignaciones_cop || ""}
                   onChange={(e) => update({ consignaciones_cop: numVal(e.target.value) })}
@@ -253,7 +250,7 @@ export function ProfileWizard() {
                 />
                 <Input
                   id="compras_consumos_cop"
-                  label="Compras y Consumos con Tarjeta (COP)"
+                  label={t.wizard.purchases}
                   type="number"
                   value={form.compras_consumos_cop || ""}
                   onChange={(e) => update({ compras_consumos_cop: numVal(e.target.value) })}
@@ -266,29 +263,29 @@ export function ProfileWizard() {
             {step === 2 && (
               <div className="space-y-5">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Actividad Económica</h2>
-                  <p className="mt-1 text-sm text-gray-500">Código CIIU y registros activos</p>
+                  <h2 className="text-lg font-semibold text-text-primary">{t.wizard.activityTitle}</h2>
+                  <p className="mt-1 text-sm text-text-secondary">{t.wizard.activityDesc}</p>
                 </div>
                 <Input
                   id="economic_activity_ciiu"
-                  label="Código CIIU Principal"
+                  label={t.wizard.ciiuCode}
                   type="text"
                   value={form.economic_activity_ciiu || ""}
                   onChange={(e) => update({ economic_activity_ciiu: e.target.value })}
                   placeholder="Ej: 4711"
-                  hint="Clasificación Industrial Internacional Uniforme"
+                  hint={t.wizard.ciiuHint}
                 />
                 <div className="space-y-3">
-                  <label className="block text-sm font-medium text-gray-700">Registros activos</label>
+                  <label className="block text-sm font-medium text-text-label">{t.wizard.activeRegistrations}</label>
                   <Checkbox
                     id="has_rut"
-                    label="Tengo RUT activo"
+                    label={t.wizard.hasRut}
                     checked={form.has_rut ?? false}
                     onChange={(v) => update({ has_rut: v })}
                   />
                   <Checkbox
                     id="has_comercio_registration"
-                    label="Tengo registro mercantil activo"
+                    label={t.wizard.hasCommerceReg}
                     checked={form.has_comercio_registration ?? false}
                     onChange={(v) => update({ has_comercio_registration: v })}
                   />
@@ -300,37 +297,37 @@ export function ProfileWizard() {
             {step === 3 && (
               <div className="space-y-5">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Ubicación y Empleados</h2>
-                  <p className="mt-1 text-sm text-gray-500">Información geográfica y de nómina</p>
+                  <h2 className="text-lg font-semibold text-text-primary">{t.wizard.locationTitle}</h2>
+                  <p className="mt-1 text-sm text-text-secondary">{t.wizard.locationDesc}</p>
                 </div>
                 <div className="grid gap-4 sm:grid-cols-2">
                   <Input
                     id="city"
-                    label="Ciudad"
+                    label={t.wizard.cityLabel}
                     type="text"
                     value={form.city || ""}
                     onChange={(e) => update({ city: e.target.value })}
-                    placeholder="Ej: Bogotá"
+                    placeholder={t.wizard.cityPlaceholder}
                   />
                   <Input
                     id="department"
-                    label="Departamento"
+                    label={t.wizard.departmentLabel}
                     type="text"
                     value={form.department || ""}
                     onChange={(e) => update({ department: e.target.value })}
-                    placeholder="Ej: Cundinamarca"
+                    placeholder={t.wizard.departmentPlaceholder}
                   />
                 </div>
                 <Checkbox
                   id="has_employees"
-                  label="Tengo empleados a cargo"
+                  label={t.wizard.hasEmployees}
                   checked={form.has_employees ?? false}
                   onChange={(v) => update({ has_employees: v, employee_count: v ? form.employee_count : 0 })}
                 />
                 {form.has_employees && (
                   <Input
                     id="employee_count"
-                    label="Número de empleados"
+                    label={t.wizard.employeeCount}
                     type="number"
                     value={form.employee_count || ""}
                     onChange={(e) => update({ employee_count: parseInt(e.target.value) || 0 })}
@@ -344,37 +341,37 @@ export function ProfileWizard() {
             {step === 4 && (
               <div className="space-y-5">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Revisión Final</h2>
-                  <p className="mt-1 text-sm text-gray-500">Verifica los datos antes de crear el perfil</p>
+                  <h2 className="text-lg font-semibold text-text-primary">{t.wizard.reviewTitle}</h2>
+                  <p className="mt-1 text-sm text-text-secondary">{t.wizard.reviewDesc}</p>
                 </div>
                 <Input
                   id="nit_last_digit"
-                  label="Último dígito del NIT"
+                  label={t.wizard.nitLastDigit}
                   type="number"
                   min={0}
                   max={9}
                   value={form.nit_last_digit ?? ""}
                   onChange={(e) => update({ nit_last_digit: e.target.value === "" ? null : parseInt(e.target.value) })}
                   placeholder="0-9"
-                  hint="Se usa para determinar las fechas del calendario tributario"
+                  hint={t.wizard.nitHint}
                 />
 
-                <div className="rounded-2xl border border-gray-100 bg-gray-50 p-5">
-                  <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-gray-400">Resumen</h3>
+                <div className="rounded-2xl border border-border bg-surface-inset p-5">
+                  <h3 className="mb-4 text-sm font-semibold uppercase tracking-wider text-text-tertiary">{t.wizard.summaryLabel}</h3>
                   <dl className="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
                     {[
-                      ["Tipo de persona", PERSONA_TYPES[form.persona_type] || form.persona_type],
-                      ["Régimen", REGIMES[form.regime] || form.regime],
-                      ["Responsable IVA", form.is_iva_responsable ? "Sí" : "No"],
-                      ["Ingresos brutos", formatCOP(form.ingresos_brutos_cop)],
-                      ["Patrimonio bruto", formatCOP(form.patrimonio_bruto_cop ?? 0)],
-                      ["Consignaciones", formatCOP(form.consignaciones_cop ?? 0)],
-                      ...(form.city ? [["Ciudad", form.city]] : []),
-                      ...(form.has_employees ? [["Empleados", `${form.employee_count}`]] : []),
+                      [t.profileFields.personaType, t.labels.personaTypes[form.persona_type] || form.persona_type],
+                      [t.profileFields.regime, t.labels.regimes[form.regime] || form.regime],
+                      [t.profileFields.ivaResponsable, form.is_iva_responsable ? t.common.yes : t.common.no],
+                      [t.profileFields.grossIncome, formatCOP(form.ingresos_brutos_cop, locale)],
+                      [t.profileFields.grossWealth, formatCOP(form.patrimonio_bruto_cop ?? 0, locale)],
+                      [t.profileFields.deposits, formatCOP(form.consignaciones_cop ?? 0, locale)],
+                      ...(form.city ? [[t.profileFields.city, form.city]] : []),
+                      ...(form.has_employees ? [[t.profileFields.employees, `${form.employee_count}`]] : []),
                     ].map(([label, value]) => (
                       <div key={label as string}>
-                        <dt className="text-xs font-medium text-gray-400">{label}</dt>
-                        <dd className="mt-0.5 font-semibold text-gray-900">{value}</dd>
+                        <dt className="text-xs font-medium text-text-tertiary">{label}</dt>
+                        <dd className="mt-0.5 font-semibold text-text-primary">{value}</dd>
                       </div>
                     ))}
                   </dl>
@@ -384,27 +381,27 @@ export function ProfileWizard() {
           </div>
 
           {/* Navigation */}
-          <div className="mt-8 flex items-center justify-between border-t border-gray-100 pt-5">
+          <div className="mt-8 flex items-center justify-between border-t border-border pt-5">
             {step > 0 ? (
               <Button type="button" variant="ghost" onClick={prev}>
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                 </svg>
-                Anterior
+                {t.common.previous}
               </Button>
             ) : (
               <div />
             )}
             {step < STEPS.length - 1 ? (
               <Button type="button" onClick={next}>
-                Siguiente
+                {t.common.next}
                 <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                 </svg>
               </Button>
             ) : (
               <Button type="submit" loading={loading} variant="success">
-                Crear Perfil y Evaluar
+                {t.wizard.createAndEvaluate}
               </Button>
             )}
           </div>

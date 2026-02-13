@@ -1,15 +1,17 @@
 import { Alert } from "@/components/ui/alert";
+import { useT } from "@/lib/language-context";
 
 interface DisclaimerBannerProps {
   text?: string;
 }
 
 export function DisclaimerBanner({ text }: DisclaimerBannerProps) {
+  const t = useT();
+
   return (
     <Alert variant="warning">
-      <strong>Herramienta informativa.</strong>{" "}
-      {text ||
-        "Los resultados son orientativos con base en la información proporcionada y no reemplazan el consejo de un profesional tributario."}
+      <strong>{t.disclaimer.title}</strong>{" "}
+      {text || t.disclaimer.defaultText}
     </Alert>
   );
 }

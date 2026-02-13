@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/lib/auth-context";
+import { useT } from "@/lib/language-context";
 import { ROUTES } from "@/lib/constants";
 import { ApiError } from "@/lib/api-client";
 import { Input } from "@/components/ui/input";
@@ -13,6 +14,7 @@ import { Alert } from "@/components/ui/alert";
 export default function LoginPage() {
   const { login } = useAuth();
   const router = useRouter();
+  const t = useT();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -26,7 +28,7 @@ export default function LoginPage() {
       await login({ email, password });
       router.push(ROUTES.DASHBOARD);
     } catch (err) {
-      setError(err instanceof ApiError ? err.detail : "Error al iniciar sesión");
+      setError(err instanceof ApiError ? err.detail : t.auth.loginError);
     } finally {
       setLoading(false);
     }
@@ -41,14 +43,14 @@ export default function LoginPage() {
             <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 18.75a60.07 60.07 0 0115.797 2.101c.727.198 1.453-.342 1.453-1.096V18.75M3.75 4.5v.75A.75.75 0 013 6h-.75m0 0v-.375c0-.621.504-1.125 1.125-1.125H20.25M2.25 6v9m18-10.5v.75c0 .414.336.75.75.75h.75m-1.5-1.5h.375c.621 0 1.125.504 1.125 1.125v9.75c0 .621-.504 1.125-1.125 1.125h-.375m1.5-1.5H21a.75.75 0 00-.75.75v.75m0 0H3.75m0 0h-.375a1.125 1.125 0 01-1.125-1.125V15m1.5 1.5v-.75A.75.75 0 003 15h-.75M15 10.5a3 3 0 11-6 0 3 3 0 016 0zm3 0h.008v.008H18V10.5zm-12 0h.008v.008H6V10.5z" />
           </svg>
         </div>
-        <span className="text-xl font-bold text-gray-900">Tributario</span>
+        <span className="text-xl font-bold text-text-primary">{t.common.appName}</span>
       </div>
 
-      <h1 className="text-2xl font-bold tracking-tight text-gray-900">
-        Bienvenido de nuevo
+      <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+        {t.auth.welcomeBack}
       </h1>
-      <p className="mt-2 text-sm text-gray-500">
-        Ingresa tus credenciales para acceder a tu cuenta
+      <p className="mt-2 text-sm text-text-secondary">
+        {t.auth.enterCredentials}
       </p>
 
       {error && (
@@ -58,36 +60,36 @@ export default function LoginPage() {
       <form onSubmit={handleSubmit} className="mt-8 space-y-5">
         <Input
           id="email"
-          label="Correo electrónico"
+          label={t.auth.email}
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          placeholder="nombre@correo.com"
+          placeholder={t.auth.emailPlaceholder}
           required
           autoComplete="email"
         />
         <Input
           id="password"
-          label="Contraseña"
+          label={t.auth.password}
           type="password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
-          placeholder="Tu contraseña"
+          placeholder={t.auth.passwordPlaceholder}
           required
           autoComplete="current-password"
         />
         <Button type="submit" loading={loading} className="w-full" size="lg">
-          Iniciar sesión
+          {t.auth.login}
         </Button>
       </form>
 
-      <p className="mt-8 text-center text-sm text-gray-500">
-        ¿No tienes cuenta?{" "}
+      <p className="mt-8 text-center text-sm text-text-secondary">
+        {t.auth.noAccount}{" "}
         <Link
           href={ROUTES.REGISTER}
           className="font-semibold text-primary-600 transition-colors hover:text-primary-500"
         >
-          Crea una gratis
+          {t.auth.createFree}
         </Link>
       </p>
     </div>

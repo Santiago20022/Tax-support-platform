@@ -14,7 +14,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         {label && (
           <label
             htmlFor={id}
-            className="mb-1.5 block text-sm font-medium text-gray-700"
+            className="mb-1.5 block text-sm font-medium text-text-label"
           >
             {label}
           </label>
@@ -22,10 +22,10 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
         <select
           ref={ref}
           id={id}
-          className={`block w-full appearance-none rounded-xl border bg-white px-4 py-2.5 pr-10 text-sm shadow-sm transition-all duration-200 hover:border-gray-400 focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:bg-gray-50 disabled:text-gray-400 ${
+          className={`block w-full appearance-none rounded-xl border bg-input-bg px-4 py-2.5 pr-10 text-sm text-text-primary shadow-sm transition-all duration-200 hover:border-text-tertiary focus:border-primary-500 focus:outline-none focus:ring-2 focus:ring-primary-500/20 disabled:bg-surface-secondary disabled:text-text-tertiary ${
             error
               ? "border-danger-500 focus:border-danger-500 focus:ring-danger-500/20"
-              : "border-gray-200"
+              : "border-border-strong"
           } ${className}`}
           style={{
             backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20' fill='%236b7280'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E")`,
@@ -36,7 +36,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           {...props}
         >
           {placeholder && (
-            <option value="" className="text-gray-400">{placeholder}</option>
+            <option value="" className="text-text-tertiary">{placeholder}</option>
           )}
           {options.map((opt) => (
             <option key={opt.value} value={opt.value}>
